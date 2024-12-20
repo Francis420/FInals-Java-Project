@@ -128,7 +128,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     // Ghosts: b = blue, o = orange, p = pink, r = red, c = cyan
     // Power-ups: S = speed, I = invisibility
     private String[][] tileMaps = {
-        {
+        { // level 1
             "XXXXXXXOXXXXXXXXXXX",
             "X        X        X",
             "X XX XXX X XXX XX X",
@@ -151,7 +151,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             "X     S           X",
             "XXXXXXXXXOXXXXXXXXX"
         },
-        {
+        { // level 2 need more levels else will go back to level 1
             "XXXXXXXXXXXXXXXXXXX",
             "X bpo    X        X",
             "X XX XXX X XXX XX X",
@@ -230,36 +230,36 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         highScoreManager = new HighScoreManager();
     
         // Load images
-        wallImage = new ImageIcon(getClass().getResource("./wall.png")).getImage();
-        blueGhostImage = new ImageIcon(getClass().getResource("./blueGhost.png")).getImage();
-        orangeGhostImage = new ImageIcon(getClass().getResource("./orangeGhost.png")).getImage();
-        pinkGhostImage = new ImageIcon(getClass().getResource("./pinkGhost.png")).getImage();
-        redGhostImage = new ImageIcon(getClass().getResource("./redGhost.png")).getImage();
-        cyanGhostImage = new ImageIcon(getClass().getResource("./cyanGhost.png")).getImage();
-        speedImage = new ImageIcon(getClass().getResource("./speed.png")).getImage();
-        invisibilityImage = new ImageIcon(getClass().getResource("./invisibility.png")).getImage();
-        heartFullImage = new ImageIcon(getClass().getResource("./heart_full.png")).getImage();
-        heartEmptyImage = new ImageIcon(getClass().getResource("./heart_blank.png")).getImage();
-        doorImage = new ImageIcon(getClass().getResource("./door.png")).getImage();
+        wallImage = new ImageIcon(getClass().getResource("/images/wall.png")).getImage();
+        blueGhostImage = new ImageIcon(getClass().getResource("/images/blueGhost.png")).getImage();
+        orangeGhostImage = new ImageIcon(getClass().getResource("/images/orangeGhost.png")).getImage();
+        pinkGhostImage = new ImageIcon(getClass().getResource("/images/pinkGhost.png")).getImage();
+        redGhostImage = new ImageIcon(getClass().getResource("/images/redGhost.png")).getImage();
+        cyanGhostImage = new ImageIcon(getClass().getResource("/images/cyanGhost.png")).getImage();
+        speedImage = new ImageIcon(getClass().getResource("/images/speed.png")).getImage();
+        invisibilityImage = new ImageIcon(getClass().getResource("/images/invisibility.png")).getImage();
+        heartFullImage = new ImageIcon(getClass().getResource("/images/heart_full.png")).getImage();
+        heartEmptyImage = new ImageIcon(getClass().getResource("/images/heart_blank.png")).getImage();
+        doorImage = new ImageIcon(getClass().getResource("/images/door.png")).getImage();
         pacmanUpImages = new Image[]{
-            new ImageIcon(getClass().getResource("./pacmanUp1.png")).getImage(),
-            new ImageIcon(getClass().getResource("./pacmanUp2.png")).getImage(),
-            new ImageIcon(getClass().getResource("./pacmanUp3.png")).getImage()
+            new ImageIcon(getClass().getResource("/images/pacmanUp1.png")).getImage(),
+            new ImageIcon(getClass().getResource("/images/pacmanUp2.png")).getImage(),
+            new ImageIcon(getClass().getResource("/images/pacmanUp3.png")).getImage()
         };
         pacmanDownImages = new Image[]{
-            new ImageIcon(getClass().getResource("./pacmanDown1.png")).getImage(),
-            new ImageIcon(getClass().getResource("./pacmanDown2.png")).getImage(),
-            new ImageIcon(getClass().getResource("./pacmanDown3.png")).getImage()
+            new ImageIcon(getClass().getResource("/images/pacmanDown1.png")).getImage(),
+            new ImageIcon(getClass().getResource("/images/pacmanDown2.png")).getImage(),
+            new ImageIcon(getClass().getResource("/images/pacmanDown3.png")).getImage()
         };
         pacmanLeftImages = new Image[]{
-            new ImageIcon(getClass().getResource("./pacmanLeft1.png")).getImage(),
-            new ImageIcon(getClass().getResource("./pacmanLeft2.png")).getImage(),
-            new ImageIcon(getClass().getResource("./pacmanLeft3.png")).getImage()
+            new ImageIcon(getClass().getResource("/images/pacmanLeft1.png")).getImage(),
+            new ImageIcon(getClass().getResource("/images/pacmanLeft2.png")).getImage(),
+            new ImageIcon(getClass().getResource("/images/pacmanLeft3.png")).getImage()
         };
         pacmanRightImages = new Image[]{
-            new ImageIcon(getClass().getResource("./pacmanRight1.png")).getImage(),
-            new ImageIcon(getClass().getResource("./pacmanRight2.png")).getImage(),
-            new ImageIcon(getClass().getResource("./pacmanRight3.png")).getImage()
+            new ImageIcon(getClass().getResource("/images/pacmanRight1.png")).getImage(),
+            new ImageIcon(getClass().getResource("/images/pacmanRight2.png")).getImage(),
+            new ImageIcon(getClass().getResource("/images/pacmanRight3.png")).getImage()
         };
         loadMap();
         for (Block ghost : ghosts) {

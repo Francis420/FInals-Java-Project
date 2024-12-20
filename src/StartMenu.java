@@ -15,9 +15,13 @@ public class StartMenu extends JPanel {
         background.setLayout(new BorderLayout());
         add(background);
 
-        JLabel titleLabel = new JLabel("Pac-Man Game", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 36));
+        JLabel titleLabel = new JLabel("Pac-Man: Maze of Mayhem", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 48));
         titleLabel.setForeground(Color.YELLOW);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+        titleLabel.setOpaque(false);
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        titleLabel.setVerticalAlignment(SwingConstants.CENTER);
         background.add(titleLabel, BorderLayout.NORTH);
 
         JTextArea instructions = new JTextArea(
@@ -39,6 +43,16 @@ public class StartMenu extends JPanel {
         startButton.setFont(new Font("Arial", Font.BOLD, 24));
         startButton.setBackground(Color.YELLOW);
         startButton.setForeground(Color.BLACK);
+        startButton.setFocusPainted(false);
+        startButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        startButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                startButton.setBackground(Color.ORANGE);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                startButton.setBackground(Color.YELLOW);
+            }
+        });
         startButton.addActionListener(_ -> {
             startGameRunnable.run();
             stopMusic();
