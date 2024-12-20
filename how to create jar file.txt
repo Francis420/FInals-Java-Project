@@ -1,0 +1,29 @@
+1. Install Java Extension Pack on VS code if dont have it yet:
+Open VS Code and go to the Extensions view by clicking on the Extensions icon in the Activity Bar on the side of the window or by pressing Ctrl+Shift+X.
+Search for "Java Extension Pack" and install it.
+
+2. Organize the Project to:
+project-root/
+├── src/
+│   ├── javafiles/
+│   ├── images/
+│   └── sounds/
+└── .vscode/
+
+3. Configure settings.json
+Open the Command Palette (Ctrl+Shift+P) and type Preferences: Open Settings (JSON).
+Add the following configuration to include your resource directories:
+{
+  "java.project.sourcePaths": ["src/javafiles"],
+  "java.project.outputPath": "bin",
+  "java.project.referencedLibraries": ["src/images", "src/sounds"]
+}
+
+//I used src/images and src/sounds instead of putting them in rss folder cuz i had too little to to debug since moving the rss to rss folder creates an error in which the compiler cant find the files
+
+4. Build the .jar File:
+Open the Command Palette (Ctrl+Shift+P) and type Java: Export Jar.
+Select your main class when prompted. This class should contain the main method.
+VS Code will package your .jar file, including the resources from src/images and src/sounds.
+
+5. After that there will be a prompt on the bottom right of your screen to reveal the file location or u can use the file explorer it should be at main_dir of your project folder, same level as src
