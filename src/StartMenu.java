@@ -1,16 +1,25 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
 
-class StartMenu extends JPanel {
-    StartMenu(ActionListener startGameListener) {
+public class StartMenu extends JPanel {
+    private AudioPlayer audioPlayer;
+
+    public StartMenu(Runnable startGameRunnable) {
         setLayout(new BorderLayout());
         setBackground(Color.BLACK);
+
+        // Initialize the audio player
+        audioPlayer = new AudioPlayer();
+
+        // Load background image
+        BackgroundPanel background = new BackgroundPanel("/background.jpg");
+        background.setLayout(new BorderLayout());
+        add(background);
 
         JLabel titleLabel = new JLabel("Pac-Man Game", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 36));
         titleLabel.setForeground(Color.YELLOW);
-        add(titleLabel, BorderLayout.NORTH);
+        background.add(titleLabel, BorderLayout.NORTH);
 
         JTextArea instructions = new JTextArea(
             "Instructions:\n" +
@@ -25,11 +34,43 @@ class StartMenu extends JPanel {
         instructions.setForeground(Color.WHITE);
         instructions.setBackground(Color.BLACK);
         instructions.setEditable(false);
-        add(instructions, BorderLayout.CENTER);
+        background.add(instructions, BorderLayout.CENTER);
 
         JButton startButton = new JButton("Start Game");
         startButton.setFont(new Font("Arial", Font.BOLD, 24));
-        startButton.addActionListener(startGameListener);
-        add(startButton, BorderLayout.SOUTH);
+        startButton.setBackground(Color.YELLOW);
+        startButton.setForeground(Color.BLACK);
+        startButton.addActionListener(_ -> {
+            startGameRunnable.run();
+            stopMusic();
+        });
+        background.add(startButton, BorderLayout.SOUTH);
+
+        // Additional buttons
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(Color.BLACK);
+        buttonPanel.setLayout(new GridLayout(1, 2));
+
+        JButton settingsButton = new JButton("Settings");
+        settingsButton.setFont(new Font("Arial", Font.BOLD, 24));
+        settingsButton.setBackground(Color.GRAY);
+        settingsButton.setForeground(Color.WHITE);
+        buttonPanel.add(settingsButton);
+
+        JButton highScoresButton = new JButton("High Scores");
+        highScoresButton.setFont(new Font("Arial", Font.BOLD, 24));
+        highScoresButton.setBackground(Color.GRAY);
+        highScoresButton.setForeground(Color.WHITE);
+        buttonPanel.add(highScoresButton);
+
+        background.add(buttonPanel, BorderLayout.NORTH);
+    }
+
+    public void playMusic() {
+        audioPlayer.play("/sounds/startmenu.wav");
+    }
+
+    public void stopMusic() {
+        audioPlayer.stop();
     }
 }

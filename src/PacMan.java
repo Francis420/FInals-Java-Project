@@ -147,6 +147,29 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             "X XXXXXX X XXXXXX X",
             "X     S           X",
             "XXXXXXXXXXXXXXXXXXX"
+        },
+        {
+            "XXXXXXXXXXXXXXXXXXX",
+            "X bpo    X        X",
+            "X XX XXX X XXX XX X",
+            "X                 X",
+            "X XX X XXXXX X XX X",
+            "X    X       X    X",
+            "XXXX XXXXcXXXX XXXX",
+            "OOOX X       X XOOO",
+            "XXXX X XXrXX X XXXX",
+            "O                 O",
+            "XXXX X XXXXX X XXXX",
+            "OOOX X       X XOOO",
+            "XXXX X XXXXX X XXXX",
+            "X        X      I X",
+            "X XX XXX X XXX XX X",
+            "X  X           X  X",
+            "XX X X XXXXX X X XX",
+            "X    X   X   X    X",
+            "X XXXXXX X XXXXXX X",
+            "X     S         P X",
+            "XXXXXXXXXXXXXXXXXXX"
         }
     };
 
@@ -162,16 +185,18 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     int lives = 3;
     boolean gameOver = false;
 
+    private AudioPlayer audioPlayer;
+    private String[] levelMusic = {
+        "/sounds/level1.wav",
+        "/sounds/level2.wav"
+    };
+
     PacMan() {
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
-        startMenu = new StartMenu(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                startGame();
-            }
-        });
+        // Initialize the start menu with a method reference
+        startMenu = new StartMenu(this::startGame);
 
         mainPanel.add(startMenu, "StartMenu");
         mainPanel.add(this, "Game");
@@ -181,7 +206,13 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         addKeyListener(this);
         setFocusable(true);
 
-        //load images
+        // Initialize the audio player
+        audioPlayer = new AudioPlayer();
+
+        // Start the background music for the start menu
+        startMenu.playMusic();
+
+        // Load images
         wallImage = new ImageIcon(getClass().getResource("./wall.png")).getImage();
         blueGhostImage = new ImageIcon(getClass().getResource("./blueGhost.png")).getImage();
         orangeGhostImage = new ImageIcon(getClass().getResource("./orangeGhost.png")).getImage();
@@ -219,17 +250,28 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             char newDirection = directions[random.nextInt(4)];
             ghost.updateDirection(newDirection);
         }
-        //how long it takes to start timer, milliseconds gone between frames
-        gameLoop = new Timer(50, this); //20fps (1000/50)
+        // How long it takes to start timer, milliseconds gone between frames
+        gameLoop = new Timer(50, this); // 20fps (1000/50)
         gameLoop.start();
+    }
 
+    private void playLevelMusic() {
+        if (audioPlayer != null) {
+            audioPlayer.stop();
+        }
+        // Alternate between the two music files
+        String musicFile = levelMusic[currentLevel % levelMusic.length];
+        audioPlayer.play(musicFile);
     }
 
     public void startGame() {
         cardLayout.show(mainPanel, "Game");
         requestFocusInWindow(); // Ensure the game panel has focus
-        System.out.println("Game panel has focus: " + hasFocus());
         gameLoop.start();
+
+        // Stop the start menu music
+        startMenu.stopMusic();
+        playLevelMusic();
     }
 
     HashSet<PowerUp> powerUps;
@@ -239,6 +281,8 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         foods = new HashSet<Block>();
         ghosts = new HashSet<Block>();
         powerUps = new HashSet<PowerUp>();
+        
+    
 
         String[] tileMap = tileMaps[currentLevel];
 
@@ -336,7 +380,6 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     }
 
     public void move() {
-        System.out.println("Move method called");
         if (isValidMove(bufferedDirection)) {
             pacman.updateDirection(bufferedDirection);
             bufferedDirection = ' ';
@@ -403,6 +446,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             currentLevel = (currentLevel + 1) % tileMaps.length;
             loadMap();
             resetPositions();
+            playLevelMusic(); // Ensure music changes when level changes
         }
     }
     
@@ -520,6 +564,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         repaint();
         if (gameOver) {
             gameLoop.stop();
+            audioPlayer.stop();
         }
     }
 
@@ -532,7 +577,6 @@ public void keyPressed(KeyEvent e) {
     if (gameOver) {
         return;
     }
-    System.out.println("Key pressed: " + e.getKeyCode());
     switch (e.getKeyCode()) {
         case KeyEvent.VK_UP:
         case KeyEvent.VK_W:
