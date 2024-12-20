@@ -3,6 +3,8 @@ import java.awt.event.*;
 import java.util.HashSet;
 import java.util.Random;
 import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
 
 class PowerUp {
     int x;
@@ -126,18 +128,18 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     // Power-ups: S = speed, I = invisibility
     private String[][] tileMaps = {
         {
-            "XXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXOXXXXXXXXXXX",
             "X        X        X",
             "X XX XXX X XXX XX X",
             "X                 X",
             "X XX X XXXXX X XX X",
             "X    X       X    X",
             "XXXX XXXXcXXXX XXXX",
-            "OOOX X       X XOOO",
+            "XXXX X       X XXXX",
             "XXXX X XXrXX X XXXX",
             "O       bpo       O",
             "XXXX X XXXXX X XXXX",
-            "OOOX X       X XOOO",
+            "XXXX X       X XXXX",
             "XXXX X XXXXX X XXXX",
             "X        X      I X",
             "X XX XXX X XXX XX X",
@@ -146,7 +148,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             "X    X   X   X    X",
             "X XXXXXX X XXXXXX X",
             "X     S           X",
-            "XXXXXXXXXXXXXXXXXXX"
+            "XXXXXXXXXOXXXXXXXXX"
         },
         {
             "XXXXXXXXXXXXXXXXXXX",
@@ -192,6 +194,15 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     };
 
     private HighScoreManager highScoreManager;
+    private AudioPlayer eatSoundPlayer;
+    private AudioPlayer gameOverSoundPlayer;
+    private AudioPlayer deathSoundPlayer;
+    private AudioPlayer speedBoostSoundPlayer;
+    private AudioPlayer invisibilitySoundPlayer;
+    private List<Point> teleportPoints;
+    private int previousX;
+    private int previousY;
+
 
     PacMan() {
         cardLayout = new CardLayout();
@@ -199,6 +210,11 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
 
         // Initialize the start menu with a method reference
         startMenu = new StartMenu(this::startGame);
+        eatSoundPlayer = new AudioPlayer();
+        gameOverSoundPlayer = new AudioPlayer();
+        deathSoundPlayer = new AudioPlayer();
+        speedBoostSoundPlayer = new AudioPlayer();
+        invisibilitySoundPlayer = new AudioPlayer();
 
         mainPanel.add(startMenu, "StartMenu");
         mainPanel.add(this, "Game");
@@ -260,6 +276,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     }
 
     private void handleGameOver() {
+        gameOverSoundPlayer.play("/sounds/gameover.wav"); // Play the game over sound effect
         String playerName = JOptionPane.showInputDialog(this, "Game Over! Enter your name:", "Game Over", JOptionPane.PLAIN_MESSAGE);
         if (playerName != null && !playerName.trim().isEmpty()) {
             highScoreManager.addHighScore(playerName, score);
@@ -294,35 +311,40 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     }
 
     public void startGame() {
+        resetGameState(); // Add this line to reset the game state
         cardLayout.show(mainPanel, "Game");
         requestFocusInWindow(); // Ensure the game panel has focus
         gameLoop.start();
-
         // Stop the start menu music
         startMenu.stopMusic();
         playLevelMusic();
     }
 
+    private void resetGameState() {
+        score = 0;
+        lives = 3;
+        gameOver = false;
+        currentLevel = 0;
+        loadMap();
+        resetPositions();
+    }
+
     HashSet<PowerUp> powerUps;
 
     public void loadMap() {
-        walls = new HashSet<Block>();
-        foods = new HashSet<Block>();
-        ghosts = new HashSet<Block>();
-        powerUps = new HashSet<PowerUp>();
-        
+        walls = new HashSet<>();
+        foods = new HashSet<>();
+        ghosts = new HashSet<>();
+        powerUps = new HashSet<>();
+        teleportPoints = new ArrayList<>(); // Initialize the list
     
-
         String[] tileMap = tileMaps[currentLevel];
-
         for (int r = 0; r < rowCount; r++) {
             for (int c = 0; c < columnCount; c++) {
                 String row = tileMap[r];
                 char tileMapChar = row.charAt(c);
-
                 int x = c * tileSize;
                 int y = r * tileSize;
-
                 if (tileMapChar == 'X') {
                     Block wall = new Block(wallImage, x, y, tileSize, tileSize);
                     walls.add(wall);
@@ -346,12 +368,14 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
                 } else if (tileMapChar == ' ') {
                     Block food = new Block(null, x + 14, y + 14, 4, 4);
                     foods.add(food);
-                } else if (tileMapChar == 'S') { // Speed power-up
+                } else if (tileMapChar == 'S') {
                     PowerUp powerUp = new PowerUp(speedImage, x, y, tileSize, tileSize, "speed");
                     powerUps.add(powerUp);
-                } else if (tileMapChar == 'I') { // Invisibility power-up
+                } else if (tileMapChar == 'I') {
                     PowerUp powerUp = new PowerUp(invisibilityImage, x, y, tileSize, tileSize, "invisibility");
                     powerUps.add(powerUp);
+                } else if (tileMapChar == 'O') {
+                    teleportPoints.add(new Point(x, y)); // Add "O" tile coordinates to the list
                 }
             }
         }
@@ -431,6 +455,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         for (Block ghost : ghosts) {
             if (collision(ghost, pacman) && !pacman.isInvisible) {
                 lives -= 1;
+                deathSoundPlayer.play("/sounds/death.wav");
                 if (lives == 0) {
                     gameOver = true;
                     return;
@@ -458,6 +483,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             if (collision(pacman, food)) {
                 foodEaten = food;
                 score += 10;
+                eatSoundPlayer.play("/sounds/eat.wav");
             }
         }
         foods.remove(foodEaten);
@@ -471,11 +497,59 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         }
         powerUps.remove(powerUpCollected);
     
+        // Check for collision with "O" tiles and teleport Pac-Man
+        for (Point teleportPoint : teleportPoints) {
+            if (pacman.x == teleportPoint.x && pacman.y == teleportPoint.y) {
+                teleportPacman();
+                break;
+            }
+        }
+    
         if (foods.isEmpty()) {
             currentLevel = (currentLevel + 1) % tileMaps.length;
             loadMap();
             resetPositions();
-            playLevelMusic(); // Ensure music changes when level changes
+            playLevelMusic();
+        }
+    }
+
+    private void teleportPacman() {
+        if (!teleportPoints.isEmpty()) {
+            // Store the previous position
+            previousX = pacman.x;
+            previousY = pacman.y;
+    
+            // Create a list of possible teleport points excluding the current position
+            List<Point> possiblePoints = new ArrayList<>();
+            for (Point point : teleportPoints) {
+                if (point.x != pacman.x || point.y != pacman.y) {
+                    possiblePoints.add(point);
+                }
+            }
+    
+            // If there are no other points to teleport to, return early
+            if (possiblePoints.isEmpty()) {
+                return;
+            }
+    
+            // Select a random point from the possible points
+            Point randomPoint = possiblePoints.get(random.nextInt(possiblePoints.size()));
+            pacman.x = randomPoint.x;
+            pacman.y = randomPoint.y;
+    
+            // Update Pac-Man's direction to face away from the previous position
+            if (pacman.x > previousX) {
+                pacman.direction = 'L'; // Move left
+            } else if (pacman.x < previousX) {
+                pacman.direction = 'R'; // Move right
+            } else if (pacman.y > previousY) {
+                pacman.direction = 'U'; // Move up
+            } else if (pacman.y < previousY) {
+                pacman.direction = 'D'; // Move down
+            }
+    
+            // Update Pac-Man's velocity based on the new direction
+            pacman.updateVelocity();
         }
     }
     
@@ -483,6 +557,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         if (powerUp.type.equals("speed")) {
             pacman.velocityX *= SPEED_MULTIPLIER;
             pacman.velocityY *= SPEED_MULTIPLIER;
+            speedBoostSoundPlayer.play("/sounds/speedboost.wav"); // Play the speed boost sound effect
             Timer speedTimer = new Timer(5000, new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -496,15 +571,14 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         } else if (powerUp.type.equals("invisibility")) {
             pacman.isInvisible = true;
             pacman.image = null; // Make Pac-Man invisible
+            invisibilitySoundPlayer.play("/sounds/invisibility.wav"); // Play the invisibility power-up sound effect
             System.out.println("Invisibility power-up activated");
-
             // Timer to flash Pac-Man's image before invisibility ends
             Timer flashTimer = new Timer(INVISIBILITY_DURATION - 2000, new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     Timer flashEffectTimer = new Timer(200, new ActionListener() {
                         private int flashCount = 0;
-
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             if (flashCount < 5) {
@@ -521,7 +595,6 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             });
             flashTimer.setRepeats(false);
             flashTimer.start();
-
             Timer invisibilityTimer = new Timer(INVISIBILITY_DURATION, new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {

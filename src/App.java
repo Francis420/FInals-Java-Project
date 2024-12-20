@@ -10,7 +10,7 @@ public class App {
         int boardWidth = columnCount * tileSize;
         int boardHeight = rowCount * tileSize;
 
-        JFrame frame = new JFrame("PacMan Reinmagined");
+        JFrame frame = new JFrame("PacMan Reimagined");
         frame.setSize(boardWidth, boardHeight);
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
@@ -31,9 +31,9 @@ public class App {
         // Create the start menu panel
         StartMenu startMenu = new StartMenu(() -> {
             audioPlayer.stop(); // Stop the start menu music
+            pacmanGame.startGame(); // Call startGame to reset and start the game
             cardLayout.show(mainPanel, "Game");
             pacmanGame.requestFocusInWindow();
-            pacmanGame.startGame();
         });
         mainPanel.add(startMenu, "StartMenu");
 
