@@ -3,6 +3,7 @@ import java.awt.*;
 
 public class StartMenu extends JPanel {
     private AudioPlayer audioPlayer;
+    private BackgroundPanel background; // Make background an instance variable
 
     public StartMenu(Runnable startGameRunnable) {
         setLayout(new BorderLayout());
@@ -12,7 +13,7 @@ public class StartMenu extends JPanel {
         audioPlayer = new AudioPlayer();
 
         // Load background image
-        BackgroundPanel background = new BackgroundPanel("/background.jpg");
+        background = new BackgroundPanel("/background.jpg");
         background.setLayout(new BorderLayout());
         add(background);
 
@@ -61,9 +62,19 @@ public class StartMenu extends JPanel {
         highScoresButton.setFont(new Font("Arial", Font.BOLD, 24));
         highScoresButton.setBackground(Color.GRAY);
         highScoresButton.setForeground(Color.WHITE);
+        highScoresButton.addActionListener(_ -> showHighScores());
         buttonPanel.add(highScoresButton);
 
         background.add(buttonPanel, BorderLayout.NORTH);
+    }
+
+    public void showHighScores() {
+        HighScoreManager highScoreManager = new HighScoreManager();
+        StringBuilder highScoresText = new StringBuilder("High Scores:\n");
+        for (HighScore highScore : highScoreManager.getHighScores()) {
+            highScoresText.append(highScore.getPlayerName()).append(": ").append(highScore.getScore()).append("\n");
+        }
+        JOptionPane.showMessageDialog(this, highScoresText.toString(), "High Scores", JOptionPane.INFORMATION_MESSAGE);
     }
 
     public void playMusic() {

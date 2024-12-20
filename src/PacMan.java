@@ -191,6 +191,8 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         "/sounds/level2.wav"
     };
 
+    private HighScoreManager highScoreManager;
+
     PacMan() {
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
@@ -205,6 +207,8 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         setBackground(Color.BLACK);
         addKeyListener(this);
         setFocusable(true);
+
+        highScoreManager = new HighScoreManager();
 
         // Initialize the audio player
         audioPlayer = new AudioPlayer();
@@ -252,6 +256,31 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         }
         // How long it takes to start timer, milliseconds gone between frames
         gameLoop = new Timer(50, this); // 20fps (1000/50)
+        gameLoop.start();
+    }
+
+    private void handleGameOver() {
+        String playerName = JOptionPane.showInputDialog(this, "Game Over! Enter your name:", "Game Over", JOptionPane.PLAIN_MESSAGE);
+        if (playerName != null && !playerName.trim().isEmpty()) {
+            highScoreManager.addHighScore(playerName, score);
+        }
+        int option = JOptionPane.showOptionDialog(this, "Would you like to restart the game or go to the home menu?", "Game Over",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, new String[]{"Restart", "Home Menu"}, "Home Menu");
+        if (option == JOptionPane.YES_OPTION) {
+            restartGame();
+        } else {
+            cardLayout.show(mainPanel, "StartMenu");
+        }
+    }
+
+    private void restartGame() {
+        score = 0;
+        lives = 3;
+        gameOver = false;
+        currentLevel = 0;
+        loadMap();
+        resetPositions();
+        playLevelMusic();
         gameLoop.start();
     }
 
@@ -565,6 +594,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         if (gameOver) {
             gameLoop.stop();
             audioPlayer.stop();
+            handleGameOver();
         }
     }
 
