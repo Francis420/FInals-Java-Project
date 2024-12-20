@@ -207,31 +207,27 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     PacMan() {
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
-
-        // Initialize the start menu with a method reference
-        startMenu = new StartMenu(this::startGame);
+    
+        // Initialize the audio player
+        audioPlayer = new AudioPlayer();
+    
+        // Initialize the start menu with the correct constructor
+        startMenu = new StartMenu(this::startGame, audioPlayer);
+    
+        // Other initializations...
         eatSoundPlayer = new AudioPlayer();
         gameOverSoundPlayer = new AudioPlayer();
         deathSoundPlayer = new AudioPlayer();
         speedBoostSoundPlayer = new AudioPlayer();
         invisibilitySoundPlayer = new AudioPlayer();
-
         mainPanel.add(startMenu, "StartMenu");
         mainPanel.add(this, "Game");
-
         setPreferredSize(new Dimension(boardWidth, boardHeight));
         setBackground(Color.BLACK);
         addKeyListener(this);
         setFocusable(true);
-
         highScoreManager = new HighScoreManager();
-
-        // Initialize the audio player
-        audioPlayer = new AudioPlayer();
-
-        // Start the background music for the start menu
-        startMenu.playMusic();
-
+    
         // Load images
         wallImage = new ImageIcon(getClass().getResource("./wall.png")).getImage();
         blueGhostImage = new ImageIcon(getClass().getResource("./blueGhost.png")).getImage();
@@ -243,28 +239,26 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         invisibilityImage = new ImageIcon(getClass().getResource("./invisibility.png")).getImage();
         heartFullImage = new ImageIcon(getClass().getResource("./heart_full.png")).getImage();
         heartEmptyImage = new ImageIcon(getClass().getResource("./heart_blank.png")).getImage();
-
-        pacmanUpImages = new Image[] {
+        pacmanUpImages = new Image[]{
             new ImageIcon(getClass().getResource("./pacmanUp1.png")).getImage(),
             new ImageIcon(getClass().getResource("./pacmanUp2.png")).getImage(),
             new ImageIcon(getClass().getResource("./pacmanUp3.png")).getImage()
         };
-        pacmanDownImages = new Image[] {
+        pacmanDownImages = new Image[]{
             new ImageIcon(getClass().getResource("./pacmanDown1.png")).getImage(),
             new ImageIcon(getClass().getResource("./pacmanDown2.png")).getImage(),
             new ImageIcon(getClass().getResource("./pacmanDown3.png")).getImage()
         };
-        pacmanLeftImages = new Image[] {
+        pacmanLeftImages = new Image[]{
             new ImageIcon(getClass().getResource("./pacmanLeft1.png")).getImage(),
             new ImageIcon(getClass().getResource("./pacmanLeft2.png")).getImage(),
             new ImageIcon(getClass().getResource("./pacmanLeft3.png")).getImage()
         };
-        pacmanRightImages = new Image[] {
+        pacmanRightImages = new Image[]{
             new ImageIcon(getClass().getResource("./pacmanRight1.png")).getImage(),
             new ImageIcon(getClass().getResource("./pacmanRight2.png")).getImage(),
             new ImageIcon(getClass().getResource("./pacmanRight3.png")).getImage()
         };
-
         loadMap();
         for (Block ghost : ghosts) {
             char newDirection = directions[random.nextInt(4)];
@@ -287,10 +281,12 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             restartGame();
         } else {
             cardLayout.show(mainPanel, "StartMenu");
+            startMenu.playMusic(); // Play the start menu music again
         }
     }
 
     private void restartGame() {
+        startMenu.stopMusic();
         score = 0;
         lives = 3;
         gameOver = false;
@@ -311,13 +307,12 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     }
 
     public void startGame() {
-        resetGameState(); // Add this line to reset the game state
-        cardLayout.show(mainPanel, "Game");
-        requestFocusInWindow(); // Ensure the game panel has focus
-        gameLoop.start();
-        // Stop the start menu music
         startMenu.stopMusic();
-        playLevelMusic();
+        resetGameState();
+        cardLayout.show(mainPanel, "Game");
+        requestFocusInWindow();
+        gameLoop.start();
+        playLevelMusic(); // Play the level music
     }
 
     private void resetGameState() {

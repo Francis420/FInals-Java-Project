@@ -20,9 +20,8 @@ public class App {
         CardLayout cardLayout = new CardLayout();
         JPanel mainPanel = new JPanel(cardLayout);
 
-        // Play background music
+        // Create the audio player
         AudioPlayer audioPlayer = new AudioPlayer();
-        audioPlayer.play("/sounds/startmenu.wav");
 
         // Create the PacMan game panel
         PacMan pacmanGame = new PacMan();
@@ -34,7 +33,7 @@ public class App {
             pacmanGame.startGame(); // Call startGame to reset and start the game
             cardLayout.show(mainPanel, "Game");
             pacmanGame.requestFocusInWindow();
-        });
+        }, audioPlayer); // Pass the audio player to the start menu
         mainPanel.add(startMenu, "StartMenu");
 
         // Add the main panel to the frame
@@ -44,5 +43,6 @@ public class App {
 
         // Show the start menu initially
         cardLayout.show(mainPanel, "StartMenu");
+        startMenu.playMusic(); // Play the start menu music initially
     }
 }

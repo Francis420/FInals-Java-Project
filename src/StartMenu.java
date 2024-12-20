@@ -3,14 +3,12 @@ import java.awt.*;
 
 public class StartMenu extends JPanel {
     private AudioPlayer audioPlayer;
-    private BackgroundPanel background; // Make background an instance variable
+    private BackgroundPanel background;
 
-    public StartMenu(Runnable startGameRunnable) {
+    public StartMenu(Runnable startGameRunnable, AudioPlayer audioPlayer) {
+        this.audioPlayer = audioPlayer;
         setLayout(new BorderLayout());
         setBackground(Color.BLACK);
-
-        // Initialize the audio player
-        audioPlayer = new AudioPlayer();
 
         // Load background image
         background = new BackgroundPanel("/background.jpg");
@@ -52,12 +50,6 @@ public class StartMenu extends JPanel {
         buttonPanel.setBackground(Color.BLACK);
         buttonPanel.setLayout(new GridLayout(1, 2));
 
-        JButton settingsButton = new JButton("Settings");
-        settingsButton.setFont(new Font("Arial", Font.BOLD, 24));
-        settingsButton.setBackground(Color.GRAY);
-        settingsButton.setForeground(Color.WHITE);
-        buttonPanel.add(settingsButton);
-
         JButton highScoresButton = new JButton("High Scores");
         highScoresButton.setFont(new Font("Arial", Font.BOLD, 24));
         highScoresButton.setBackground(Color.GRAY);
@@ -78,7 +70,9 @@ public class StartMenu extends JPanel {
     }
 
     public void playMusic() {
-        audioPlayer.play("/sounds/startmenu.wav");
+        if (audioPlayer != null && !audioPlayer.isPlaying()) {
+            audioPlayer.loop("/sounds/startmenu.wav");
+        }
     }
 
     public void stopMusic() {
