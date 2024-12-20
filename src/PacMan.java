@@ -112,6 +112,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     private Image invisibilityImage;
     private Image heartFullImage;
     private Image heartEmptyImage;
+    private Image doorImage;
     public CardLayout cardLayout;
     public JPanel mainPanel;
     private StartMenu startMenu;
@@ -239,6 +240,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         invisibilityImage = new ImageIcon(getClass().getResource("./invisibility.png")).getImage();
         heartFullImage = new ImageIcon(getClass().getResource("./heart_full.png")).getImage();
         heartEmptyImage = new ImageIcon(getClass().getResource("./heart_blank.png")).getImage();
+        doorImage = new ImageIcon(getClass().getResource("./door.png")).getImage();
         pacmanUpImages = new Image[]{
             new ImageIcon(getClass().getResource("./pacmanUp1.png")).getImage(),
             new ImageIcon(getClass().getResource("./pacmanUp2.png")).getImage(),
@@ -325,14 +327,16 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     }
 
     HashSet<PowerUp> powerUps;
+    HashSet<Block> doors;
 
     public void loadMap() {
         walls = new HashSet<>();
         foods = new HashSet<>();
         ghosts = new HashSet<>();
         powerUps = new HashSet<>();
-        teleportPoints = new ArrayList<>(); // Initialize the list
-    
+        doors = new HashSet<>(); 
+        teleportPoints = new ArrayList<>();
+
         String[] tileMap = tileMaps[currentLevel];
         for (int r = 0; r < rowCount; r++) {
             for (int c = 0; c < columnCount; c++) {
@@ -370,7 +374,9 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
                     PowerUp powerUp = new PowerUp(invisibilityImage, x, y, tileSize, tileSize, "invisibility");
                     powerUps.add(powerUp);
                 } else if (tileMapChar == 'O') {
-                    teleportPoints.add(new Point(x, y)); // Add "O" tile coordinates to the list
+                    Block door = new Block(doorImage, x, y, tileSize, tileSize);
+                    doors.add(door); 
+                    teleportPoints.add(new Point(x, y)); 
                 }
             }
         }
@@ -392,6 +398,10 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             g.drawImage(wall.image, wall.x, wall.y, wall.width, wall.height, null);
         }
     
+        for (Block door : doors) {
+            g.drawImage(door.image, door.x, door.y, door.width, door.height, null);
+        }
+    
         g.setColor(Color.WHITE);
         for (Block food : foods) {
             g.fillRect(food.x, food.y, food.width, food.height);
@@ -407,17 +417,15 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         } else {
             g.drawString(" Score: " + String.valueOf(score), tileSize / 2, tileSize / 2);
         }
-
         int heartX = tileSize / 2;
         int heartY = tileSize / 2;
-            for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 3; i++) {
             if (i < lives) {
                 g.drawImage(heartFullImage, heartX + (i * 32), heartY, 32, 32, null);
             } else {
                 g.drawImage(heartEmptyImage, heartX + (i * 32), heartY, 32, 32, null);
             }
-    }
-
+        }
     }
 
     public boolean collision(Block a, PowerUp b) {
